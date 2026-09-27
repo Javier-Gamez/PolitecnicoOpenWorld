@@ -72,7 +72,6 @@ object SfStageCatalog {
      * (`SfArcadeLadder.ALL_PARTICIPANTS`) son formales.
      *
      * Compartidos:
-     * - CU UNAM: PAPARAZZI_1 + POLICIA_GRANADERO_MUJER
      * - Zócalo: POLICIA_GRANADERO_HOMBRE + LA_PRESIDENTA
      *
      * Los 16 mapas base tienen al menos un peleadór hogar.
@@ -95,7 +94,7 @@ object SfStageCatalog {
         SfFighterId.POLICIA_CDMX_HOMBRE -> FES_ACATLAN
         SfFighterId.POLICIA_CDMX -> UAM_CUAJI
         SfFighterId.POLICIA_GRANADERO_HOMBRE -> ZOCALO
-        SfFighterId.POLICIA_GRANADERO_MUJER -> UNAM_CU // comparte con Paparazzi 1
+        SfFighterId.POLICIA_GRANADERO_MUJER -> BIBLIOTECA_IPN
         // ── Leyenda / jefes ──
         SfFighterId.CHARRO_NEGRO -> AGAVE
         SfFighterId.LA_LLORONA -> ISLA_MUNECAS
