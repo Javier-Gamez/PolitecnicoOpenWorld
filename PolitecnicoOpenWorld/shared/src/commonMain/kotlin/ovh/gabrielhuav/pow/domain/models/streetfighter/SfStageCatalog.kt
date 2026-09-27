@@ -56,11 +56,13 @@ object SfStageCatalog {
     val PIRAMIDE = Stage("piramidesol", "Pirámide del Sol", "fondo_piramidesol_anim.webp")
     val UAM_CUAJI = Stage("uam_cuajimalpa", "UAM Cuajimalpa", "fondo_uam_cuajimalpa_anim.webp")
     val ZOCALO = Stage("zocalo", "Zócalo", "fondo_zocalo_anim.webp")
+    val BIBLIOTECA_IPN = Stage("biblioteca_ipn", "Biblioteca Nacional IPN", "fondo_biblioteca_ipn_anim.webp")
 
     val ALL_STAGES: List<Stage> = listOf(
         ESCOM, QUESO_IPN, ESIME_AZC, CECYT_9, CECYT_2,
         UNAM_CU, FES_ACATLAN, UAM_AZCAPO, ISLA_MUNECAS, MICTLÁN,
         AGAVE, FAC_MED, FES_ARAGON, PIRAMIDE, UAM_CUAJI, ZOCALO,
+        BIBLIOTECA_IPN,
     )
 
     /**
