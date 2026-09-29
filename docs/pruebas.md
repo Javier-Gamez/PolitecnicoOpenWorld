@@ -164,6 +164,33 @@
 
 ---
 
+## Checks automáticos del PR (CI)
+
+Workflow analizado: [`.github/workflows/pr-quality-gate.yml`](https://github.com/gabrielhuav/PolitecnicoOpenWorld/blob/main/.github/workflows/pr-quality-gate.yml), revisado el 2026-09-28. Se dispara en `pull_request` (opened/synchronize/reopened) hacia `main`, solo si cambian archivos bajo `PolitecnicoOpenWorld/**`. Tiene 2 jobs bloqueantes: `unit-tests` (JDK 21, `gradle :app:assembleDebug :app:testDebugUnitTest :shared:testAndroidHostTest --stacktrace`, con `secrets.properties` generado a partir del secret `MAPS_API_KEY` y sin `google-services.json`) y `detekt` (análisis estático con `config/detekt/baseline.xml`, bloqueante solo ante hallazgos nuevos).
+
+| Run | Commit | Fecha | Estado reportado por GitHub | Liga |
+|---|---|---|---|---|
+| 1 | `53873915` (commits de código/assets) | 2026-09-27 | `action_required` (0 jobs ejecutados) | https://github.com/gabrielhuav/PolitecnicoOpenWorld/actions/runs/36298951810 |
+| 2 | `9c9f8461` (plan de QA) | 2026-09-29 | `action_required` (0 jobs ejecutados) | https://github.com/gabrielhuav/PolitecnicoOpenWorld/actions/runs/36532700438 |
+
+**Interpretación:** `action_required` con 0 jobs ejecutados es el gate estándar de GitHub Actions que exige **aprobación manual del mantenedor** para correr workflows en Pull Requests que vienen de un fork externo (protección de secretos del repositorio ante colaboradores por primera vez). No es un fallo del código ni de los tests — es un bloqueo externo fuera de nuestro control, tal como contempla el examen. No tenemos permisos de mantenedor sobre `gabrielhuav/PolitecnicoOpenWorld` para aprobarlo nosotros mismos.
+
+**Validación local equivalente realizada** (mismas tareas que ejecuta el job `unit-tests`, con `JDK` compatible con 21 vía `gradle-daemon-jvm.properties` del propio proyecto, y el mismo `detekt-cli 1.23.8` + baseline que usa el job `detekt`):
+
+| Verificación local | Resultado |
+|---|---|
+| `detekt-cli` con `config/detekt/detekt.yml` + `baseline.xml` | ✅ exit code 0, 0 hallazgos nuevos |
+| `tools/check_kmp_test_names.sh` | ✅ pasa |
+| `gradle :app:assembleDebug :app:testDebugUnitTest :shared:testAndroidHostTest --stacktrace` | ✅ BUILD SUCCESSFUL |
+| `:app:testDebugUnitTest` | ✅ 125/125, 0 fallas |
+| `:shared:testAndroidHostTest` | ✅ 217/217, 0 fallas |
+
+**Dependencia que limita la cobertura:** igual que el CI, la validación local se hizo con `secrets.properties` conteniendo un `MAPS_API_KEY` placeholder (no una clave real de Google Maps) y sin `google-services.json` — por lo tanto **no** se validó que las funciones de mapas (Google Maps nativo) o Firebase Auth funcionen con credenciales reales; solo se valida que el proyecto compile y pase sus pruebas unitarias sin esas integraciones configuradas, igual que hace el CI oficial a propósito.
+
+**Hallazgo relacionado (defecto preexistente, no introducido por este PR):** un `MAPS_API_KEY` **vacío** (en vez de un placeholder no vacío) en `secrets.properties` rompe `compileDebugJavaWithJavac` con `illegal start of expression` en `BuildConfig.java` (el campo generado queda como `public static final String MAPS_API_KEY = ;`). Reproducido también en un checkout limpio del SHA base `7ed325393f82872c2be94ff2ada46948efa19152` (antes de cualquier commit de este PR) — confirmado como preexistente en `main`, no relacionado con este cambio. Estado: **preexistente, no corregido** (fuera del alcance declarado de este PR).
+
+---
+
 ## Cierre del QA
 
 _(Se completa al terminar todas las ejecuciones: recomendación de integrar o no el cambio, evidencia que la respalda, y riesgos que permanecen.)_
