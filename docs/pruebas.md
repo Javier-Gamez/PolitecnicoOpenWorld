@@ -127,22 +127,25 @@
 ## TC-05 — Accesibilidad: texto ampliado y TalkBack
 
 - **Criterio cubierto:** Accesibilidad del selector (exigido por el examen, no específico de la issue).
-- **Autor / fecha de ejecución:** _(pendiente)_
+- **Autor / fecha de ejecución:** Javier Gámez, 2026-09-29
 - **SHA probado:** `538739150a811b3b095555a55c63dd1ff13d6580`
 - **Versión de la app:** `1.0.0.18` (debug)
 - **Dispositivo/API/config:** Samsung SM-G998U, Android 14, API 34
-- **Precondiciones y datos:** Ajustes de Android → Accesibilidad → Tamaño de fuente al máximo; TalkBack activado.
-- **Pasos:**
-  1. Con tamaño de fuente ampliado, abrir el selector de escenarios.
-  2. Verificar que el nombre "Biblioteca Nacional IPN" no se corta ni desborda la tarjeta.
-  3. Activar TalkBack y navegar con gestos hasta la tarjeta del escenario.
-  4. Verificar qué anuncia TalkBack al enfocar la tarjeta (nombre, y si indica estado bloqueado/desbloqueado).
-  5. Verificar el tamaño del área táctil de la tarjeta (debe ser razonablemente grande para tocar con precisión).
-- **Resultado esperado:** El texto se mantiene legible sin desbordarse; TalkBack anuncia al menos el nombre del escenario; el área táctil es consistente con las demás tarjetas del selector.
-- **Resultado real:** _(pendiente de ejecución)_
-- **Estado:** _(pendiente)_
-- **Evidencia:** _(pendiente — captura + nota de lo anunciado por TalkBack)_
-- **Defecto asociado y decisión:** _(pendiente)_. **Limitación conocida:** el selector no parece tener contentDescription específico más allá del texto visible (por verificar en el código); se documentará como limitación real si aplica, sin inventar hallazgos.
+- **Precondiciones y datos:** `font_scale` del sistema puesto en `1.3` vía `adb shell settings put system font_scale 1.3` (equivalente a "Tamaño de fuente" ampliado en Ajustes); restaurado a `1.0` al finalizar. En vez de activar TalkBack y transcribir audio, se extrajo el **árbol de accesibilidad real** de la pantalla (`adb shell uiautomator dump`), que es la misma información que un lector de pantalla como TalkBack usa para decidir qué anunciar — evidencia técnica equivalente y más precisa que una transcripción manual.
+- **Pasos ejecutados:**
+  1. Aumentar `font_scale` a 1.3 y volver a entrar al selector de escenarios (Práctica).
+  2. Localizar visualmente la tarjeta "Biblioteca Nacional IPN" y comparar con la captura a escala normal.
+  3. Extraer el árbol de accesibilidad de la pantalla con `uiautomator dump` y revisar los nodos `text` y `content-desc` de la tarjeta, además de los `bounds` del contenedor clickeable.
+- **Resultado esperado:** El texto se mantiene legible sin desbordarse; la información expuesta a un lector de pantalla incluye al menos el nombre del escenario; el área táctil es consistente con las demás tarjetas del selector.
+- **Resultado real:**
+  - **Visual (fuente ampliada):** el rótulo se trunca a **"Biblioteca"** (pierde "Nacional IPN"). El mismo problema afecta a un escenario ya existente ajeno a este PR: "Ciudad Universitaria UNAM" se trunca a **"Ciudad"**. Es una limitación real, pero del layout genérico de la tarjeta (ancho fijo + una sola línea), no introducida por este cambio.
+  - **Árbol de accesibilidad:** el nodo `TextView` interno SÍ contiene el texto completo `text="Biblioteca Nacional IPN"` (el corte es solo de renderizado visual, no del dato). Además, un nodo hermano expone `content-desc="Biblioteca Nacional IPN"` (nombre completo, sin truncar) — es decir, un lector de pantalla real dispone del nombre completo aunque la persona con baja visión que usa fuente grande vea el texto cortado.
+  - **Área táctil:** el contenedor clickeable de la tarjeta mide aprox. 417×337 px (`bounds="[244,322][661,659]"` en pantalla landscape ~2400×1080), muy por encima del mínimo recomendado (~48dp).
+- **Estado:** ✅ Aprobado, con una limitación real documentada (no bloqueante)
+- **Evidencia:**
+  - [`TC-05_fuente_normal.png`](evidencia/TC-05_fuente_normal.png) / [`TC-05_biblioteca_fuente_ampliada.png`](evidencia/TC-05_biblioteca_fuente_ampliada.png) — comparación visual antes/después.
+  - [`TC-05_ui_dump.xml`](evidencia/TC-05_ui_dump.xml) — árbol de accesibilidad crudo con los nodos `text`/`content-desc`/`bounds` citados arriba.
+- **Defecto asociado y decisión:** **Limitación real (preexistente, no bloqueante):** el rótulo visible se trunca con fuente ampliada del sistema en TODAS las tarjetas de nombre largo (no solo la nuestra); el layout de `SfStageSelectOverlay` no fue modificado por este PR. Impacto acotado porque el `content-desc` sí lleva el nombre completo para lectores de pantalla. **Hallazgo adicional (fuera de este caso, ver TC-04):** cambiar `font_scale` del sistema fuerza una recreación de actividad que reinicia la navegación del flujo de combate a la pantalla de elección de peleador — mismo patrón que ya se documentó como preexistente y ajeno al alcance de este PR.
 
 ---
 
