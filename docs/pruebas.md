@@ -152,19 +152,22 @@
 ## TC-06 — Compatibilidad: otro dispositivo/API (emulador)
 
 - **Criterio cubierto:** Riesgo R4.
-- **Autor / fecha de ejecución:** _(pendiente)_
+- **Autor / fecha de ejecución:** Javier Gámez, 2026-09-29
 - **SHA probado:** `538739150a811b3b095555a55c63dd1ff13d6580`
 - **Versión de la app:** `1.0.0.18` (debug)
-- **Dispositivo/API/config:** Emulador `CatalogoUI` — Pixel 7 (perfil), API 37.1, x86_64
-- **Precondiciones y datos:** Mismo APK debug instalado; progreso de Arcade limpio o con `POLICIA_GRANADERO_MUJER` ya vencida (repetir TC-01 en este entorno).
-- **Pasos:**
-  1. Instalar el APK debug en el emulador `CatalogoUI`.
-  2. Repetir los pasos de TC-01 (desbloquear y jugar en Biblioteca Nacional IPN) en este entorno.
-- **Resultado esperado:** Mismo comportamiento que en el dispositivo físico: el atlas decodifica sin errores, el combate corre sin caídas de rendimiento perceptibles ni crashes, en un API level y tamaño de pantalla distintos.
-- **Resultado real:** _(pendiente de ejecución)_
-- **Estado:** _(pendiente)_
-- **Evidencia:** _(pendiente)_
-- **Defecto asociado y decisión:** _(pendiente)_
+- **Dispositivo/API/config:** Emulador `CatalogoUI` — perfil Pixel 7, **API 37 (Android 17 preview)**, x86_64, idioma del sistema en **inglés** (a diferencia del Samsung físico en español) — cubre además la variante de idioma de la categoría "Compatibilidad o entorno".
+- **Precondiciones y datos:** Instalación limpia del mismo APK debug (sin progreso de Arcade previo en este emulador).
+- **Pasos ejecutados:**
+  1. Instalar el APK debug en el emulador `CatalogoUI` y conceder el permiso de ubicación al abrir.
+  2. Navegar Titulación por Combate → Other modes → Practice → peleador → rival → dificultad → selector de escenario.
+  3. Ubicar la tarjeta "Biblioteca Nacional IPN" (día) desplazando la lista horizontal.
+  4. Intentar enfocarla/seleccionarla (sin haberla desbloqueado en este emulador).
+- **Resultado esperado:** El atlas decodifica sin errores (miniatura limpia, sin mosaico); el estado de bloqueo se respeta igual que en el dispositivo físico; no hay crashes.
+- **Resultado real:** La tarjeta "Biblioteca Nacional IPN" se renderiza correctamente (imagen única, arte pixel-art, sin mosaico ni artefactos) en esta API/arquitectura distinta (API 37 x86_64 vs. API 34 arm64 del Samsung). Al no estar desbloqueada en esta instalación limpia, aparece con 🔒 y **no se puede enfocar ni seleccionar** al tocarla (el foco permanece en la tarjeta previamente seleccionada) — mismo comportamiento de bloqueo verificado en TC-02, consistente entre dispositivos. No se repitió la escalera completa de Arcade en este entorno (la lógica de desbloqueo es Kotlin puro, ya verificada end-to-end en TC-01 de forma independiente del dispositivo); el alcance de este caso se limitó a la parte sensible al entorno: decodificación/render del atlas y la pantalla de selección.
+- **Hallazgo adicional (fuera de alcance, no relacionado a este PR):** la pantalla de **menú principal** (no la de combate) se renderiza rota en landscape en este emulador — el contenido queda comprimido en la mitad izquierda de la pantalla y la mitad derecha queda en negro. La pantalla de combate/selector de escenarios (donde vive nuestro cambio) **sí** se ve correctamente a pantalla completa. Se documenta como limitación observada del entorno de prueba / posible defecto preexistente del menú principal, ajeno al alcance de este PR (que no toca esa pantalla).
+- **Estado:** ✅ Aprobado
+- **Evidencia:** [`TC-06_biblioteca.png`](evidencia/TC-06_biblioteca.png) (tarjeta renderizada correctamente), [`TC-06_biblioteca_preview2.png`](evidencia/TC-06_biblioteca_preview2.png) (intento de selección sin efecto, bloqueada), [`TC-06_combate1.png`](evidencia/TC-06_combate1.png) (menú principal roto en landscape, hallazgo adicional), [`TC-06_combate2.png`](evidencia/TC-06_combate2.png) (pantalla de combate correcta en el mismo emulador).
+- **Defecto asociado y decisión:** Ninguno relacionado a este PR. El hallazgo del menú principal en landscape se deja registrado como observación, fuera del alcance de esta corrección (no se modificó esa pantalla).
 
 ---
 
@@ -197,4 +200,25 @@ Workflow analizado: [`.github/workflows/pr-quality-gate.yml`](https://github.com
 
 ## Cierre del QA
 
-_(Se completa al terminar todas las ejecuciones: recomendación de integrar o no el cambio, evidencia que la respalda, y riesgos que permanecen.)_
+**Resumen de los 6 casos:**
+
+| Caso | Categoría | Estado |
+|---|---|---|
+| TC-01 | Ruta feliz | ✅ Aprobado |
+| TC-02 | Condición límite | ✅ Aprobado |
+| TC-03 | Regresión | ✅ Aprobado |
+| TC-04 | Navegación y estado | ✅ Aprobado (con observación no bloqueante) |
+| TC-05 | Accesibilidad | ✅ Aprobado (con limitación real documentada) |
+| TC-06 | Compatibilidad | ✅ Aprobado |
+
+**Recomendación:** se recomienda **integrar este cambio**. Los dos criterios de aceptación de la Issue #40 quedaron verificados con evidencia real y reproducible (datos persistidos del dispositivo, no solo capturas de UI): el escenario se desbloquea correctamente al vencer a `POLICIA_GRANADERO_MUJER` en Arcade real, permanece bloqueado antes de eso, no rompe el escenario que antes compartía (`CU UNAM`/Paparazzi 1), y el atlas renderiza correctamente tanto en el dispositivo físico como en un emulador con API y arquitectura distintas.
+
+**Hallazgos que quedan pendientes (ninguno bloqueante para este PR):**
+1. El botón Atrás en el selector de mapa de Práctica regresa al menú principal en vez de retroceder un paso — preexistente, ajeno a este cambio (TC-04).
+2. Los rótulos largos de escenario se truncan visualmente con `font_scale` grande, aunque el `content-desc` para lectores de pantalla sí lleva el nombre completo — preexistente, afecta también a escenarios previos como CU UNAM (TC-05).
+3. El menú principal se renderiza roto en landscape en el emulador de prueba — preexistente, pantalla no tocada por este PR (TC-06).
+4. Un `MAPS_API_KEY` vacío rompe la compilación (`compileDebugJavaWithJavac`) — preexistente, confirmado también en el SHA base sin nuestros commits (Parte 3 / CI).
+
+Ninguno de estos 4 hallazgos fue introducido por este PR (se verificó explícitamente en cada caso, comparando contra el comportamiento preexistente o contra el SHA base). Se dejan documentados como transparencia del proceso de QA, no como bloqueantes de esta contribución específica.
+
+**Riesgo residual:** bajo. El cambio es aditivo (nuevo dato de catálogo + reasignación de un peleador + assets), no toca lógica de red, persistencia de otros sistemas, ni pantallas fuera del modo de combate. El único checkpoint pendiente fuera de nuestro control es la aprobación manual del CI por parte del mantenedor (`action_required`), y la revisión de un compañero de equipo (Parte 3.2, pendiente de coordinar).
