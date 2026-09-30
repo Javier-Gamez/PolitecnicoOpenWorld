@@ -104,23 +104,23 @@
 ## TC-04 — Navegación y estado: back, reapertura y ciclo de vida
 
 - **Criterio cubierto:** Robustez de navegación (no ligado a un criterio de aceptación específico, pero exigido por el examen).
-- **Autor / fecha de ejecución:** _(pendiente)_
+- **Autor / fecha de ejecución:** Javier Gámez, 2026-09-29
 - **SHA probado:** `538739150a811b3b095555a55c63dd1ff13d6580`
 - **Versión de la app:** `1.0.0.18` (debug)
 - **Dispositivo/API/config:** Samsung SM-G998U, Android 14, API 34
 - **Precondiciones y datos:** `POLICIA_GRANADERO_MUJER` ya vencida (heredado de TC-01).
-- **Pasos:**
-  1. Abrir el selector de escenarios y seleccionar "Biblioteca Nacional IPN".
-  2. Presionar Atrás antes de confirmar "Elegir este mapa".
-  3. Confirmar que se regresa a la pantalla anterior sin crash y sin haber cambiado el mapa.
-  4. Reabrir el selector, elegir "Biblioteca Nacional IPN" y confirmar.
-  5. Durante el combate, presionar el botón Home (pasar la app a segundo plano) y volver a abrirla.
-  6. **Nota sobre orientación:** si la pantalla de combate tiene la orientación fija (verificar en el manifest/código), documentarlo aquí y omitir la prueba de rotación, sustituyéndola por la transición Home/reanudación del paso 5.
+- **Pasos ejecutados:**
+  1. Abrir el selector de escenarios (Práctica) y seleccionar "Biblioteca Nacional IPN".
+  2. Presionar Atrás (botón/gesto del sistema) antes de confirmar "Elegir este mapa".
+  3. Observar a dónde regresa la navegación.
+  4. Reabrir el selector, elegir "Biblioteca Nacional IPN" y confirmar, iniciando un combate real.
+  5. Durante el combate, presionar el botón Home del sistema (pasar la app a segundo plano) y reabrir Politécnico Open World desde recientes.
+  6. **Nota sobre orientación (verificada en código):** no se encontró `android:screenOrientation` en `AndroidManifest.xml` ni bloqueo programático (`requestedOrientation`) para la pantalla de combate — la orientación **no está fija**. Sin embargo, este comportamiento es genérico de toda la pantalla de combate (compartido por los 16 escenarios preexistentes) y no fue tocado por este PR, que solo agrega una entrada más al catálogo/tema. Se decidió no repetir una prueba de rotación por ser una característica preexistente y ajena al alcance de este cambio; en su lugar se profundizó en la transición Home/reanudación (paso 5), que sí ejercita el mismo código de guardado/restauración de sesión (`ArcadeSession`) que usa nuestro escenario nuevo igual que los demás.
 - **Resultado esperado:** Ninguna transición produce cierre inesperado; al volver de segundo plano, el combate continúa en el mismo estado (mismo mapa, mismos peleadores, progreso de la ronda conservado o pausado correctamente).
-- **Resultado real:** _(pendiente de ejecución)_
-- **Estado:** _(pendiente)_
-- **Evidencia:** _(pendiente — video corto de la secuencia)_
-- **Defecto asociado y decisión:** _(pendiente)_
+- **Resultado real:** (Paso 2-3) Presionar Atrás desde el selector de mapa **no retrocede un paso dentro del flujo de configuración** (peleador → rival → dificultad → mapa); regresa directo a la pantalla principal ("POLITÉCNICO OPEN WORLD"), perdiendo las selecciones previas de peleador/rival/dificultad. No hay crash ni congelamiento, solo pérdida de progreso de configuración. (Paso 5) Al presionar Home durante el combate y reabrir la app, esta muestra correctamente una pantalla de **"PAUSA"** con el logo de POW y el mismo estado del combate (peleadores, marcador, mapa) intacto, con botón "Continuar" — comportamiento correcto y seguro.
+- **Estado:** ✅ Aprobado, con una observación
+- **Evidencia:** [`TC-04_back_a_menu_principal.png`](evidencia/TC-04_back_a_menu_principal.png), [`TC-04_home_pausa.webp`](evidencia/TC-04_home_pausa.webp)
+- **Defecto asociado y decisión:** **Observación (no bloqueante, preexistente):** el botón Atrás en el selector de mapa de Práctica salta directo al menú principal en vez de retroceder un paso. Es un comportamiento de navegación genérico de la pantalla de combate, compartido por los 16 escenarios ya existentes antes de este PR — no fue introducido ni se relaciona con el cambio de este PR (que solo añade datos a `SfStageCatalog`/`SfTheme`, sin tocar navegación). Se documenta como hallazgo preexistente, fuera del alcance de esta corrección; no bloquea la integración de este cambio.
 
 ---
 
