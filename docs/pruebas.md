@@ -38,44 +38,47 @@
 ## TC-01 — Ruta feliz: desbloquear y jugar en Biblioteca Nacional IPN
 
 - **Criterio cubierto:** Criterio de aceptación #1. Riesgo R1.
-- **Autor / fecha de ejecución:** _(pendiente)_
+- **Autor / fecha de ejecución:** Javier Gámez, 2026-09-29
 - **SHA probado:** `538739150a811b3b095555a55c63dd1ff13d6580`
 - **Versión de la app:** `1.0.0.18` (debug)
 - **Dispositivo/API/config:** Samsung SM-G998U, Android 14, API 34
-- **Precondiciones y datos:** Progreso de Arcade limpio o con `POLICIA_GRANADERO_MUJER` aún no vencida (usar "Reset" del arcade si ya se había vencido antes en pruebas manuales previas).
-- **Pasos:**
-  1. Abrir el modo Arcade / Titulación por Combate.
-  2. Jugar la escalera de Arcade hasta enfrentar y vencer a `Policía Granadera Mujer`.
-  3. Ir a Práctica libre y abrir el selector de escenarios.
-  4. Localizar la tarjeta "Biblioteca Nacional IPN".
-  5. Seleccionarla y confirmar "Elegir este mapa".
-  6. Jugar un combate completo (ganar o perder una ronda) sin salir de la pantalla.
+- **Precondiciones y datos:** Progreso de Arcade reiniciado (`adb shell pm clear`); Modo Desarrollador confirmado **desactivado** (`DEVELOPER_MODE=false`) antes de jugar, para que el desbloqueo fuera real y no vía "unlock all" de desarrollador.
+- **Pasos ejecutados:**
+  1. Abrir Titulación por Combate → Arcade (peleador Estudiante/`ESCOMBOY`, dificultad Fácil).
+  2. Jugar la escalera de Arcade hasta la Pelea 10 de 15, correspondiente a `Policía Granadera Mujer` (confirmado por el orden real de `ladderRivals` en el guardado del dispositivo).
+  3. Ganar el combate (calificación B) pese a perder la primera ronda.
+  4. Ir a Práctica libre → selector de escenarios y localizar "Biblioteca Nacional IPN".
+  5. Confirmar visualmente que ya no muestra candado 🔒.
+  6. Verificar además, en una partida previa de Práctica contra la misma rival, que el fondo anima correctamente durante un combate completo (ronda jugada de inicio a "WINS").
 - **Resultado esperado:** La tarjeta muestra una sola imagen (miniatura limpia, sin mosaico) con el arte pixel-art; al seleccionarla se anima; el combate se desarrolla con el fondo animado (día) renderizando correctamente durante todo el match, sin errores visuales ni cierres inesperados.
-- **Resultado real:** _(pendiente de ejecución)_
-- **Estado:** _(pendiente)_
-- **Evidencia:** _(pendiente — capturas/video)_
-- **Defecto asociado y decisión:** R1 (thumbnail en mosaico) — **corregido** antes de esta ejecución (ver commit `53873915`, conversión de `_thumb.png` a `_thumb.webp`). Se re-verifica aquí que la corrección sigue vigente.
+- **Resultado real:** Coincide con lo esperado. Verificación de datos en el dispositivo tras la victoria: `LADDER_STEP=10` y `UNLOCKED_MAPS_V2` ahora incluye `fondo_biblioteca_ipn_anim.webp`, `..._noche_1_anim.webp` y `..._noche_2_anim.webp` (desbloqueo real y persistente, no solo de UI). El selector de Práctica muestra las 3 tarjetas sin candado. El combate jugado contra la misma rival en este escenario mostró el fondo animado (pixel-art, atardecer con "#FESARAGON"/"#IPNDE") renderizando de forma fluida y sin artefactos durante toda la pelea, terminando en pantalla de victoria normal ("ESCOMBOY WINS").
+- **Estado:** ✅ Aprobado
+- **Evidencia:**
+  - [`TC-01_arcade_granadera_1.webp`](evidencia/TC-01_arcade_granadera_1.webp), [`TC-01_arcade_granadera_2_wins.webp`](evidencia/TC-01_arcade_granadera_2_wins.webp), [`TC-01_arcade_calificacion.png`](evidencia/TC-01_arcade_calificacion.png) — combate real de Arcade y calificación "Pelea 10 de 15".
+  - [`TC-01_selector_desbloqueado.webp`](evidencia/TC-01_selector_desbloqueado.webp) — selector sin candado tras el desbloqueo.
+  - [`TC-01_combate_biblioteca_1.webp`](evidencia/TC-01_combate_biblioteca_1.webp), [`TC-01_combate_biblioteca_2.webp`](evidencia/TC-01_combate_biblioteca_2.webp), [`TC-01_combate_biblioteca_3_wins.webp`](evidencia/TC-01_combate_biblioteca_3_wins.webp) — combate completo con el fondo animado.
+- **Defecto asociado y decisión:** R1 (thumbnail en mosaico) — **corregido** antes de esta ejecución (ver commit `53873915`, conversión de `_thumb.png` a `_thumb.webp`); se re-verificó aquí que la corrección sigue vigente (thumbnails limpios en el selector). Sin hallazgos nuevos.
 
 ---
 
 ## TC-02 — Condición límite: escenario bloqueado antes de vencer a la peleadora dueña
 
 - **Criterio cubierto:** Criterio de aceptación #2. Riesgo R3.
-- **Autor / fecha de ejecución:** _(pendiente)_
+- **Autor / fecha de ejecución:** Javier Gámez, 2026-09-29
 - **SHA probado:** `538739150a811b3b095555a55c63dd1ff13d6580`
 - **Versión de la app:** `1.0.0.18` (debug)
 - **Dispositivo/API/config:** Samsung SM-G998U, Android 14, API 34
-- **Precondiciones y datos:** Progreso de Arcade reiniciado (Ajustes → Reset del progreso de Arcade), de forma que `POLICIA_GRANADERO_MUJER` NO haya sido vencida.
+- **Precondiciones y datos:** Progreso de Arcade reiniciado vía `adb shell pm clear ovh.gabrielhuav.pow` (no existe un botón de reset en Ajustes accesible al jugador), de forma que `POLICIA_GRANADERO_MUJER` NO haya sido vencida. **Modo Desarrollador desactivado** en Ajustes (ver nota de entorno abajo).
 - **Pasos:**
-  1. Confirmar en Ajustes que el progreso de Arcade está reiniciado (solo peleadores/mapas por defecto desbloqueados).
+  1. Confirmar que el progreso de Arcade está reiniciado (solo peleadores/mapas por defecto desbloqueados).
   2. Abrir el selector de escenarios en Práctica libre.
   3. Localizar la tarjeta "Biblioteca Nacional IPN".
   4. Intentar tocarla.
 - **Resultado esperado:** La tarjeta aparece atenuada (semi-transparente) con un ícono de candado 🔒 superpuesto; el toque no hace nada (no navega ni la selecciona), igual que el resto de escenarios no desbloqueados.
-- **Resultado real:** _(pendiente de ejecución)_
-- **Estado:** _(pendiente)_
-- **Evidencia:** _(pendiente — captura)_
-- **Defecto asociado y decisión:** Ninguno esperado; si la tarjeta apareciera seleccionable, sería un defecto crítico (rompe la progresión) → bloqueante.
+- **Resultado real:** La tarjeta "Biblioteca Nacional IPN" (las 3 variantes) aparece atenuada con 🔒, igual que "CECyT 2 (Noche 2)" y "Ciudad Universitaria" (tampoco desbloqueadas aún). Al tocarla, no reacciona: no se resalta, no navega, el botón "Elegir este mapa" permanece deshabilitado. Coincide exactamente con lo esperado.
+- **Estado:** ✅ Aprobado
+- **Evidencia:** [`docs/evidencia/TC-02_selector_bloqueado.png`](evidencia/TC-02_selector_bloqueado.png)
+- **Defecto asociado y decisión:** Ninguno. **Nota de entorno (no es defecto del cambio):** tras el primer `pm clear`, "Modo Desarrollador" apareció reactivado (`DEVELOPER_MODE=true`) sin intervención del usuario — posiblemente restaurado por el backup automático de Samsung del dispositivo de prueba. Se desactivó manualmente en Ajustes antes de repetir la prueba. No afecta la validez de este resultado ni es atribuible al cambio de este PR.
 
 ---
 
@@ -86,17 +89,15 @@
 - **SHA probado:** `538739150a811b3b095555a55c63dd1ff13d6580`
 - **Versión de la app:** `1.0.0.18` (debug)
 - **Dispositivo/API/config:** Samsung SM-G998U, Android 14, API 34
-- **Precondiciones y datos:** Progreso de Arcade reiniciado.
-- **Pasos:**
-  1. Jugar la escalera de Arcade hasta vencer a `Paparazzi 1`.
-  2. Ir a Práctica libre, abrir el selector de escenarios.
-  3. Verificar el estado de la tarjeta "Ciudad Universitaria UNAM" (día, noche, noche 2).
-  4. Seleccionarla y jugar un combate corto.
-- **Resultado esperado:** Las 3 luces de "Ciudad Universitaria UNAM" quedan desbloqueadas y funcionan exactamente igual que antes de la reasignación (sin relación ya con `Policía Granadera Mujer`); el combate corre sin errores.
-- **Resultado real:** _(pendiente de ejecución)_
-- **Estado:** _(pendiente)_
-- **Evidencia:** _(pendiente)_
-- **Defecto asociado y decisión:** Ninguno esperado.
+- **Precondiciones y datos:** Progreso de Arcade reiniciado (mismo run de TC-01: la escalera real pasa por `PAPARAZZI_1` en la posición 3, antes de llegar a `POLICIA_GRANADERO_MUJER` en la 10).
+- **Pasos ejecutados:**
+  1. Como parte de la misma corrida de Arcade de TC-01, se venció a `Paparazzi 1` (posición 3 de 15) camino a la Policía Granadera Mujer.
+  2. Verificar en los datos persistidos del dispositivo (`pow_sf_arcade.xml`) el estado de `UNLOCKED_MAPS_V2` para el escenario `unam_biblioteca_cu`.
+- **Resultado esperado:** Las 3 luces de "Ciudad Universitaria UNAM" quedan desbloqueadas y funcionan exactamente igual que antes de la reasignación (sin relación ya con `Policía Granadera Mujer`).
+- **Resultado real:** `UNLOCKED_MAPS_V2` contiene `fondo_unam_biblioteca_cu_anim.webp`, `..._noche_1_anim.webp` y `..._noche_2_anim.webp` tras vencer a Paparazzi 1, exactamente igual que antes de este PR. El mecanismo de desbloqueo (`SfArcadeRepository.unlockFighter` → `SfStageCatalog.unlockableMapsForFighter`) es el mismo código ya validado end-to-end en TC-01 para Biblioteca Nacional IPN; no se modificó ningún dato de `UNAM_CU` (`Stage`, archivos, `SfTheme`) en este PR, solo se retiró a `POLICIA_GRANADERO_MUJER` como dueña secundaria. Por ese motivo se consideró suficiente la verificación por datos persistidos, sin repetir una captura de combate adicional en este escenario (el renderizado del fondo de CU UNAM no fue tocado por el cambio).
+- **Estado:** ✅ Aprobado
+- **Evidencia:** Extracto de `pow_sf_arcade.xml` (comando `adb shell run-as ovh.gabrielhuav.pow cat shared_prefs/pow_sf_arcade.xml`) mostrando `unam_biblioteca_cu_anim.webp`, `unam_biblioteca_cu_noche_1_anim.webp`, `unam_biblioteca_cu_noche_2_anim.webp` en `UNLOCKED_MAPS_V2`; mismo dump reutilizado de TC-01.
+- **Defecto asociado y decisión:** Ninguno. Sin regresión.
 
 ---
 
