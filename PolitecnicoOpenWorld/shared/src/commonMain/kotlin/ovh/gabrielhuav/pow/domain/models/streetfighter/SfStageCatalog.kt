@@ -39,7 +39,7 @@ object SfStageCatalog {
         }
     }
 
-    // ---- Catálogo de mapas implementados (16 bases × 3 iluminaciones = 48) ----
+    // ---- Catálogo de mapas implementados (17 bases × 3 iluminaciones = 51) ----
     val ESCOM = Stage("escom", "ESCOM", "fondo_escom_anim.webp")
     val QUESO_IPN = Stage("queso_ipn", "Queso IPN", "fondo_queso_ipn_anim.webp")
     val ESIME_AZC = Stage("esime_azc", "ESIME Azcapotzalco", "fondo_esime_azc_anim.webp")
@@ -74,7 +74,7 @@ object SfStageCatalog {
      * Compartidos:
      * - Zócalo: POLICIA_GRANADERO_HOMBRE + LA_PRESIDENTA
      *
-     * Los 16 mapas base tienen al menos un peleadór hogar.
+     * Los 17 mapas base tienen al menos un peleadór hogar.
      * Alpha/shared (LÁZARO, etc.): fallback solo para Modo Dev.
      */
     fun homeStage(id: SfFighterId): Stage = when (id) {
@@ -145,7 +145,7 @@ object SfStageCatalog {
         return ALL_STAGES.find { it.dayFile == base }
     }
 
-    /** Lista plana de los 48 fondos (día+noche+apocalipsis) para el selector de práctica. */
+    /** Lista plana de los 51 fondos (día+noche+apocalipsis) para el selector de práctica. */
     fun allBackgroundFiles(): List<String> = ALL_STAGES.flatMap { s ->
         listOf(s.file(Lighting.DAY), s.file(Lighting.NIGHT), s.file(Lighting.APOCALYPSE))
     }
